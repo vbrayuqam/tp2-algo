@@ -5,7 +5,6 @@
 #include "Histoire.hpp"
 #include "Lecteur.hpp"
 #include "arbremap.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -86,9 +85,14 @@ void faireCalculsTf(vector< Histoire * > * &contenu,  vector<ArbreMap<string, do
             for (auto pIt = p.begin(); pIt != p.end(); pIt++) {
                 temp[*pIt] = 0;
             }
+        }
+    }
 
-            for (auto pIt2 = p.begin(); pIt2 != p.end(); pIt2++) {
-                temp[*pIt2] = temp[*pIt2] + 1;
+    for( Histoire * histoire : * contenu) {
+        ArbreMap<string, double> temp;
+        for( Phrase p : * histoire ) {
+            for (auto pIt = p.begin(); pIt != p.end(); pIt++) {
+                temp[*pIt] = (temp[*pIt] + 1);
             }
         }
         contenant.push_back(temp);
@@ -123,9 +127,9 @@ void trouverDf(vector< Histoire * > * &contenu, ArbreMap<string, double> &conten
     }
 }
 
-void faireCalculIdf(vector< Histoire * > * &histoires, ArbreMap<string, double> &contenu, ArbreMap<string, double> &contenant) {
+void faireCalculIdf(vector< Histoire * > * &hist, ArbreMap<string, double> &contenu, ArbreMap<string, double> &contenant) {
     int index = 0;
-    for ( Histoire * histoire : * histoires) {
+    for ( Histoire * histoire : * hist) {
         index++;
     }
 
@@ -134,40 +138,87 @@ void faireCalculIdf(vector< Histoire * > * &histoires, ArbreMap<string, double> 
     }
 }
 
+void faireCalculsDeuxiemePhase(vector< Histoire * > * &hist, vector<ArbreMap<string, double>> &arbTf, ArbreMap<string, double> &arbIdf, ArbreMap<string, double> &res, vector<string> &requete) {
+    int index= 0;
+    for ( Histoire * histoire : * hist) {
+        double somme = 0;
+
+        for (int i = 0; i < requete.size(); i++) {
+            double valTf = 0;
+            for(auto iter = arbTf.at(index).debut(); iter != arbTf.at(index).fin(); iter++) {
+                if (requete.at(i) == iter.cle()) {
+                    valTf = arbTf.at(index)[requete.at(i)];
+                }
+            }
+
+            double valIdf = 0;
+            for(auto iter = arbIdf.debut(); iter != arbIdf.fin(); iter++) {
+                if (requete.at(i) == iter.cle()) {
+                    valIdf = arbIdf[requete.at(i)];
+                }
+            }
+
+            somme = somme + (valTf * valIdf);
+        }
+
+        res[histoire->titre()] = somme;
+        index++;
+    }
+}
+
+void afficherResultats(ArbreMap<string, double> &res) {
+    vector<string> titres;
+    vector<double> valeurs;
+
+    for (auto iter = res.debut(); iter != res.fin(); iter++) {
+        titres.push_back(iter.cle());
+        valeurs.push_back(iter.valeur());
+    }
+
+    for (int i = 0; i < 5; i++) {
+        int maxIndex = 0;;
+        for (int j = 1; j < valeurs.size() ; j++) {
+            if (valeurs.at(j) > valeurs.at(maxIndex)) {
+                maxIndex = j;
+            }
+        }
+
+        cout << valeurs.at(maxIndex) << " : " << titres.at(maxIndex) << endl;
+
+        titres.erase(titres.begin() + maxIndex);
+        valeurs.erase(valeurs.begin() + maxIndex);
+    }
+}
+
 int main() {
-    // Variables
     bool continuer = true;
     string requeteInit;
     vector< string > motsRequete;
     vector<ArbreMap<string, double>> tfArbres;
     ArbreMap<string, double> idfArbreTransition;
     ArbreMap<string, double> idfArbre;
+    ArbreMap<string, double> resultats;
 
-    // Gestion des histoires
     vector< Histoire * > * histoires = lireDocuments( string( "listeDocument.xml" ) );
 
-    // Premier calculs
     faireCalculsTf(histoires, tfArbres);
     trouverDf(histoires, idfArbreTransition);
     faireCalculIdf(histoires, idfArbreTransition, idfArbre);
 
-    // Boucle principale
     do {
         motsRequete.clear();
         requeteInit = saisirRequete();
         definirMotsRequete(motsRequete, requeteInit);
 
-        // Ajustement de la variable pour continuer la boucle
         if (motsRequete.empty()) {
             continuer = false;
         }
         if (continuer) {
-            // Deuxieme phase de calculs
-            // Affichage des sorties
+            faireCalculsDeuxiemePhase(histoires, tfArbres, idfArbre, resultats, motsRequete);
+            afficherResultats(resultats);
         }
     } while (continuer);
 
-    // Fin du programme
     afficherMsgFin();
     return 0;
 }
