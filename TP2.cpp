@@ -190,6 +190,15 @@ void afficherResultats(ArbreMap<string, double> &res) {
     }
 }
 
+void nettoyerArbres(vector<ArbreMap<string, double>> vecteurArbre, ArbreMap<string, double> &arbre1, ArbreMap<string, double> &arbre2, ArbreMap<string, double> &arbre3) {
+    arbre1.vider();
+    arbre2.vider();
+    arbre3.vider();
+    for (int i = 0; i < vecteurArbre.size(); i++) {
+        vecteurArbre.at(i).vider();
+    }
+}
+
 int main() {
     bool continuer = true;
     string requeteInit;
@@ -219,6 +228,7 @@ int main() {
         }
     } while (continuer);
 
+    nettoyerArbres(tfArbres, idfArbre, idfArbreTransition, resultats);
     afficherMsgFin();
     return 0;
 }
