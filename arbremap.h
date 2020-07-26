@@ -11,10 +11,16 @@
 
 #include "arbreavl.h"
 
+/*
+ * Classe representant un Arbre Map.
+ */
 template <class K, class V>
 class ArbreMap
 {
   private:
+    /*
+    * Classe representant une entree cle/valeur dans l'ArbreMap.
+    */
     class Entree{
         public:
             Entree(const K& c) : cle(c), valeur() {}
@@ -34,6 +40,9 @@ class ArbreMap
     const V& operator[] (const K&) const;
     V& operator[] (const K&);
 
+    /*
+    * Classe representant l'iterateur de l'ArbreMap.
+    */
     class Iterateur {
         public:
             Iterateur(const ArbreMap& a) : iter(a.entrees.debut()) {}
@@ -58,23 +67,39 @@ class ArbreMap
 };
 
 
-
+/*
+ * Vide le contenu de l'ArbreMap.
+ */
 template <class K, class V>
 void ArbreMap<K,V>::vider(){
     entrees.vider();
 }
 
+/*
+ * Retourne true si l'arbre est vide, sinon retourne false.
+ */
 template <class K, class V>
 bool ArbreMap<K,V>::vide() const{
     return entrees.vide();
 }
 
+/*
+ * Pas implementer.
+ * Enleve une entree de l'arbre.
+ *
+ * c: La cle associe a la valeur qui doit etre enlever.
+ */
 template <class K, class V>
 void ArbreMap<K,V>::enlever(const K& c)
 {
     entrees.enlever(Entree(c));
 }
 
+/*
+ * Retourne true si l'arbre contient la valeur, sinon retourne false.
+ *
+ * c: La valeur a verifier.
+ */
 template <class K, class V>
 bool ArbreMap<K,V>::contient(const K& c) const
 {
@@ -82,6 +107,11 @@ bool ArbreMap<K,V>::contient(const K& c) const
     return false;
 }
 
+/*
+ * Retourne une valeur.
+ *
+ * c: La cle pour assigner ou retourner une valeur.
+ */
 template <class K, class V>
 const V& ArbreMap<K,V>::operator[] (const K& c)  const
 {
@@ -89,6 +119,11 @@ const V& ArbreMap<K,V>::operator[] (const K& c)  const
     return entrees[iter].valeur;
 }
 
+/*
+ * Assigne une valeur.
+ *
+ * c: La cle pour assigner ou retourner une valeur.
+ */
 template <class K, class V>
 V& ArbreMap<K,V>::operator[] (const K& c) 
 {
@@ -100,45 +135,73 @@ V& ArbreMap<K,V>::operator[] (const K& c)
     return entrees[iter].valeur;
 }
 
-// Iterateur
-
+/*
+ * Retourne un iterateur a partir du debut de l'arbre.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::debut() const {
     return Iterateur(*this);
 }
 
+/*
+ * Retourne un iterateur representant la fin de l'arbre.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::fin() const {
     typename ArbreAVL<Entree>::Iterateur iter(entrees);
     return Iterateur(iter);
 }
 
+/*
+ * Recherche une entree dans l'arbre et la retourne.
+ *
+ * e: L'entree qui doit etre rechercher.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::rechercher(const K &e) const {
     return entrees.rechercherEgalOuSuivant(Entree(e));
 }
 
+/*
+ * Recherche une entree dans l'arbre et retourne, si elle n'est pas dans l'arbre retourne l'entree suivante.
+ *
+ * e: L'entree qui doit etre rechercher.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::rechercherEgalOuSuivant(const K &e) const {
     return entrees.rechercherEgalOuSuivant(Entree(e));
 }
 
+/*
+ * Recherche une entree dans l'arbre et retourne, si elle n'est pas dans l'arbre retourne l'entree precedente.
+ *
+ * e: L'entree qui doit etre rechercher.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::rechercherEgalOuPrecedent(const K &e) const {
     return entrees.rechercherEgalOuPrecedent(Entree(e));
 }
 
 
+/*
+ * Retourne la valeur true/false de l'iterateur.
+ */
 template <class K, class V>
 ArbreMap<K, V>::Iterateur::operator bool() const {
     return iter;
 }
 
+/*
+ * Retourne l'inverse de la valeur true/false de l'iterateur.
+ */
 template <class K, class V>
 bool ArbreMap<K, V>::Iterateur::operator!() const {
     return !iter;
 }
 
+/*
+ * Fait le pre increment de l'iterateur.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur& ArbreMap<K, V>::Iterateur::operator++() {
     if (!this) return *this;
@@ -146,6 +209,9 @@ typename ArbreMap<K, V>::Iterateur& ArbreMap<K, V>::Iterateur::operator++() {
     return *this;
 }
 
+/*
+ * Fait le post increment de l'iterateur.
+ */
 template <class K, class V>
 typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::Iterateur::operator++(int) {
     Iterateur copie(*this);
@@ -153,11 +219,17 @@ typename ArbreMap<K, V>::Iterateur ArbreMap<K, V>::Iterateur::operator++(int) {
     return copie;
 }
 
+/*
+ * Retourne la cle de l'entree itere.
+ */
 template <class K, class V>
 const K& ArbreMap<K, V>::Iterateur::cle() const {
     return (*iter).cle;
 }
 
+/*
+ * Retourne la valeur de l'entree itere.
+ */
 template <class K, class V>
 const V& ArbreMap<K, V>::Iterateur::valeur() const {
     return (*iter).valeur;

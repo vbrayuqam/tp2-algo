@@ -1,4 +1,7 @@
-
+/* TP2 - INF3105
+   AUTEUR(S):
+    1) Vincent Bray - BRAV20069009
+*/
 
 #include "DocumentXML.hpp"
 #include "ElementXML.hpp"
@@ -21,7 +24,11 @@
 using namespace std;
 
 
-
+/*
+ * Lit le fichier pour creer la structure des histoires et les retournes dans un vecteur.
+ *
+ * a_nomFicher: Nom du fichier a lire.
+ */
 vector< Histoire * > *
 lireDocuments( string a_nomFichier )
 {
@@ -57,6 +64,9 @@ lireDocuments( string a_nomFichier )
     return histoires;
 }
 
+/*
+ * Saisit la requete au terminal et la retourne en string.
+ */
 string saisirRequete() {
     string inputReq;
     cout << "\nVeuillez entrer votre requete et appuyer sur la touche ENTER, une requete vide terminera le programme:\n" << endl;
@@ -64,6 +74,12 @@ string saisirRequete() {
     return inputReq;
 }
 
+/*
+ * Definit les mots de la requete.
+ *
+ * contenant: Un vecteur de string qui recoit les mots de la requete.
+ * contenu: Un string qui contient les mots de la requete avant qu'ils soient separes.
+ */
 void definirMotsRequete(vector<string> &contenant, string &contenu) {
     regex delim("[^\\s.,:;!?\\=\\\\\\/\\_+@#$%&*()\\[\\]\\{\\}éè\\^âîôñç\"'1234567890]+");
     auto deb = sregex_iterator(contenu.begin(), contenu.end(), delim);
@@ -74,10 +90,22 @@ void definirMotsRequete(vector<string> &contenant, string &contenu) {
     }
 }
 
+/*
+ * Affiche le message de fin.
+ */
 void afficherMsgFin() {
     cout << "\nMerci de votre utilisation, a la prochaine.\n" << endl;
 }
 
+/*
+ * Effectue le calcul tf de la premiere phase.
+ *
+ * hist: Un vecteur contenant les histoires.
+ * arbTf: Un vecteur contenant des ArbreMap qui contiennent le tf des mots.
+ * arbIdf: Un arbreMap contenant l'idf des mots.
+ * res: Un ArbreMap qui contiendra les resultats.
+ * requete: Un vecteur de string contenant les mots de la requete.
+ */
 void faireCalculsTf(vector< Histoire * > * &contenu,  vector<ArbreMap<string, double>> &contenant) {
     for( Histoire * histoire : * contenu) {
         ArbreMap<string, double> temp;
@@ -99,6 +127,12 @@ void faireCalculsTf(vector< Histoire * > * &contenu,  vector<ArbreMap<string, do
     }
 }
 
+/*
+ * Trouve le df des mots des histoires.
+ *
+ * contenu: Un vecteur contenant les hisoires.
+ * contenant: Un ArbreMap qui recoit le df des mots.
+ */
 void trouverDf(vector< Histoire * > * &contenu, ArbreMap<string, double> &contenant) {
     ArbreMap<string, double> temp;
     for ( Histoire * histoire : * contenu) {
@@ -127,6 +161,13 @@ void trouverDf(vector< Histoire * > * &contenu, ArbreMap<string, double> &conten
     }
 }
 
+/*
+ * Effectue le calcul idf de la premiere phase.
+ *
+ * hist: Un vecteur contenant les histoires.
+ * contenu: Un ArbreMap qui contient le df des mots.
+ * contenant: Un ArbreMap qui recoit l'idf des mots.
+ */
 void faireCalculIdf(vector< Histoire * > * &hist, ArbreMap<string, double> &contenu, ArbreMap<string, double> &contenant) {
     int index = 0;
     for ( Histoire * histoire : * hist) {
@@ -138,6 +179,15 @@ void faireCalculIdf(vector< Histoire * > * &hist, ArbreMap<string, double> &cont
     }
 }
 
+/*
+ * Effectue la deuxieme phase de calculs.
+ *
+ * hist: Un vecteur contenant les histoires.
+ * arbTf: Un vecteur contenant des ArbreMap qui contiennent le tf des mots.
+ * arbIdf: Un arbreMap contenant l'idf des mots.
+ * res: Un ArbreMap qui contiendra les resultats.
+ * requete: Un vecteur de string contenant les mots de la requete.
+ */
 void faireCalculsDeuxiemePhase(vector< Histoire * > * &hist, vector<ArbreMap<string, double>> &arbTf, ArbreMap<string, double> &arbIdf, ArbreMap<string, double> &res, vector<string> &requete) {
     int index= 0;
     for ( Histoire * histoire : * hist) {
@@ -166,6 +216,11 @@ void faireCalculsDeuxiemePhase(vector< Histoire * > * &hist, vector<ArbreMap<str
     }
 }
 
+/*
+ * Affiche les resultats de le requete.
+ *
+ * res: Un ArbreMap contenant les resultats.
+ */
 void afficherResultats(ArbreMap<string, double> &res) {
     vector<string> titres;
     vector<double> valeurs;
@@ -190,6 +245,14 @@ void afficherResultats(ArbreMap<string, double> &res) {
     }
 }
 
+/*
+ * Vide le contenu des arbres pour supprimer les noeuds.
+ *
+ * vecteurArbre: Un vecteur contenant des arbres a vider.
+ * arbre1: Un arbre a vider.
+ * arbre2: Un arbre a vider.
+ * arbre3: Un arbre a vider.
+ */
 void nettoyerArbres(vector<ArbreMap<string, double>> vecteurArbre, ArbreMap<string, double> &arbre1, ArbreMap<string, double> &arbre2, ArbreMap<string, double> &arbre3) {
     arbre1.vider();
     arbre2.vider();
@@ -199,7 +262,9 @@ void nettoyerArbres(vector<ArbreMap<string, double>> vecteurArbre, ArbreMap<stri
     }
 }
 
+// Fonction main
 int main() {
+    // Initialisation des variables
     bool continuer = true;
     string requeteInit;
     vector< string > motsRequete;
@@ -208,13 +273,17 @@ int main() {
     ArbreMap<string, double> idfArbre;
     ArbreMap<string, double> resultats;
 
+    // Creation de la structure des histoires
     vector< Histoire * > * histoires = lireDocuments( string( "listeDocument.xml" ) );
 
+    // Premiere phase de calculs
     faireCalculsTf(histoires, tfArbres);
     trouverDf(histoires, idfArbreTransition);
     faireCalculIdf(histoires, idfArbreTransition, idfArbre);
 
+    // Boucle de requete
     do {
+        // Requete
         motsRequete.clear();
         requeteInit = saisirRequete();
         definirMotsRequete(motsRequete, requeteInit);
@@ -223,11 +292,15 @@ int main() {
             continuer = false;
         }
         if (continuer) {
+            //Deuxieme phase de calculs
             faireCalculsDeuxiemePhase(histoires, tfArbres, idfArbre, resultats, motsRequete);
+
+            //Affichage des sorties
             afficherResultats(resultats);
         }
     } while (continuer);
 
+    // Fin du programme
     nettoyerArbres(tfArbres, idfArbre, idfArbreTransition, resultats);
     afficherMsgFin();
     return 0;
